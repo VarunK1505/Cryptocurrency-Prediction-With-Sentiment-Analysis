@@ -2,6 +2,10 @@
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
+# Big pickle files
+SVC_classifier.pickle
+SVC_classifier_final.pickle
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
