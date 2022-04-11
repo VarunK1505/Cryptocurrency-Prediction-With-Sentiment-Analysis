@@ -4,8 +4,41 @@ import numpy as np
 import pandas as pd
 from datetime import timedelta
 import statsmodels
+from nltk.classify import ClassifierI
+from statistics import mode
 
 app = Flask(__name__)
+
+word_feature_path = open('../models/word_features.pickle', 'rb')
+word_features = pickle.load(word_feature_path)
+word_feature_path.close()
+
+def find_features(document):
+    words = set(document)
+    features = {}
+    for w in word_features:
+         features[w] = (w in words)
+    return features
+
+class VoteClassifier(ClassifierI):
+    def __init__(self, *classifiers):
+        self._classifiers = classifiers
+        
+    def classify(self, features):
+        votes = []
+        for c in self._classifiers:
+            v = c.classify(features)
+            votes.append(v)
+        return mode(votes)
+    
+    def confidence(self, features):
+        votes = []
+        for c in self._classifiers:
+            v = c.classify(features)
+            votes.append(v)
+        choice_votes = votes.count(mode(votes))
+        conf = choice_votes / len(votes)
+        return conf
 
 @app.route('/')
 @app.route('/home')
@@ -81,3 +114,35 @@ def litecoin_page():
 
 
     return render_template('litecoin.html')
+
+@app.route('/sentiment', methods=['GET', 'POST'])
+def sentiment_page():
+    if request.method == 'POST':
+        tweet = request.form.get('tweet')
+        feature_set = find_features(tweet)
+
+        pickle_in = open("../models/naivebayes_final.pickle", 'rb')
+        classifier = pickle.load(pickle_in)
+        pickle_in.close()
+        
+        pickle_in = open("../models/MNB_classifier_final.pickle", 'rb')
+        MNB_classifier = pickle.load(pickle_in)
+        pickle_in.close()
+        
+        pickle_in = open("../models/bernoulliNB_classifier_final.pickle", 'rb')
+        BernoulliNB_classifier = pickle.load(pickle_in)
+        pickle_in.close()
+
+        pickle_in = open("../models/LogisticRegression_classifier_final.pickle", 'rb')
+        LogisticRegression_classifier = pickle.load(pickle_in)
+        pickle_in.close()
+
+        voted_classifier = VoteClassifier(classifier,
+                                  MNB_classifier, 
+                                  BernoulliNB_classifier, 
+                                  LogisticRegression_classifier)
+
+        classification = [voted_classifier.classify(feature_set), voted_classifier.confidence(feature_set)]
+        return render_template('sentiment.html', check = True, classification = classification)
+
+    return render_template('sentiment.html', check=False)
