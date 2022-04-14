@@ -1,0 +1,18 @@
+.form_table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form {
+    margin: 2rem;
+}
+
+.chart_div {
+    margin-right: 1rem;
+}
+
+.myChart {
+    position: relative; 
+    height:40vh;
+    width:60vw
+}

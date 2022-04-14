@@ -7,6 +7,9 @@ import statsmodels
 from nltk.classify import ClassifierI
 from statistics import mode
 
+import tweepy
+from apikeys import *
+
 app = Flask(__name__)
 
 word_feature_path = open('../models/word_features.pickle', 'rb')
@@ -39,6 +42,8 @@ class VoteClassifier(ClassifierI):
         choice_votes = votes.count(mode(votes))
         conf = choice_votes / len(votes)
         return conf
+
+client = tweepy.Client(bearer_token=bearertoken)
 
 @app.route('/')
 @app.route('/home')
@@ -118,9 +123,6 @@ def litecoin_page():
 @app.route('/sentiment', methods=['GET', 'POST'])
 def sentiment_page():
     if request.method == 'POST':
-        tweet = request.form.get('tweet')
-        feature_set = find_features(tweet)
-
         pickle_in = open("../models/naivebayes_final.pickle", 'rb')
         classifier = pickle.load(pickle_in)
         pickle_in.close()
@@ -138,11 +140,37 @@ def sentiment_page():
         pickle_in.close()
 
         voted_classifier = VoteClassifier(classifier,
-                                  MNB_classifier, 
-                                  BernoulliNB_classifier, 
-                                  LogisticRegression_classifier)
-
-        classification = [voted_classifier.classify(feature_set), voted_classifier.confidence(feature_set)]
-        return render_template('sentiment.html', check = True, classification = classification)
-
-    return render_template('sentiment.html', check=False)
+                                MNB_classifier, 
+                                BernoulliNB_classifier, 
+                                LogisticRegression_classifier)
+        
+        form_name = request.form['form-name']
+        if (form_name == 'form1'):
+            tweet = request.form.get('tweet')
+            feature_set = find_features(tweet)
+            classification = [voted_classifier.classify(feature_set), voted_classifier.confidence(feature_set)]
+            return render_template('sentiment.html', check = 2, classification = classification)
+        if (form_name == 'form2'):
+            currency = request.form.get('currency')
+            query = currency + ' lang:en'
+            tweets = client.search_recent_tweets(query=query, max_results=100)
+            X = []
+            Y = []
+            x  = 0
+            y = 0
+            for tweet in tweets.data:
+                x += 1
+                raw_tweet = tweet.text
+                clean_tweet = raw_tweet.replace("\n", "")
+                feature_set = find_features(clean_tweet)
+                classification = voted_classifier.classify(feature_set)
+                if(classification == 'positive'):
+                    y += 1
+                elif(classification == 'negative'):
+                    y -= 1
+                else:
+                    continue
+                X.append(x)
+                Y.append(y)
+            return render_template('sentiment.html', check=1, X = X, Y = Y, currency = currency)
+    return render_template('sentiment.html')
