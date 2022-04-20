@@ -1,0 +1,16 @@
+.subheading {
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+}
+
+.about {
+    padding: 2rem;
+    margin: 1rem;
+}
+
+.about_img {
+  float: left;
+  height: 650px;
+  width: 500px;
+  margin-right: 1rem;
+}

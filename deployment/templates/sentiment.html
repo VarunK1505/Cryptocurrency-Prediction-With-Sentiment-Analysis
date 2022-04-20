@@ -1,0 +1,106 @@
+{% extends 'base.html' %} 
+
+{% block title %} 
+Bitcoin Analysis 
+{% endblock %} 
+
+{% block links %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sentiment.css') }}" />
+{% endblock %} 
+
+{% block content %}
+    <div class="content">
+    <h1>Sentiment Analysis</h1>
+
+    <table class="form_table">
+        <tr>
+            <td>
+                <h4>Enter a custom tweet to see its sentiment</h4>
+                <form action="{{ url_for('sentiment_page') }}" method="POST" class="form">
+                    <input type="hidden" name="form-name" value="form1">
+                    <label for="tweet" class="form-label">Enter Tweet</label>
+                    <input type="text" name="tweet" /> <br />
+                    <input
+                    type="submit"
+                    name="submit"
+                    value="Submit"
+                    class="btn btn-dark submit_btn"
+                    />
+                </form>
+            </td>
+
+            <td>
+                <hr style="height: 250px; width: 1px; margin-left: 2rem; margin-right: 2rem;"/>
+            </td>
+
+            <td>
+                <h4>Real time stream twitter tweets</h4>
+                <form action="{{ url_for('sentiment_page') }}" method="POST" class="form">
+                    <input type="hidden" name="form-name" value="form2">
+                    <label for="currency">Select the type of currency:</label>
+                    <select name="currency">
+                        <option value="bitcoin">Bitcoin</option>
+                        <option value="ethereum">Ethereum</option>
+                        <option value="litecoin">Litecoin</option>
+                    </select> <br />
+
+                    <input
+                    type="submit"
+                    name="submit"
+                    value="Submit"
+                    class="btn btn-dark submit_btn"
+                    />
+                </form>
+            </td>
+        </tr>
+    </table>
+
+    {% if check == 2 %}
+        <h2>Output:</h2>
+        <h3>The classification is: {{ classification[0] }}</h3>
+        <h4>The confidence is: {{ classification[1] }}</h4>
+    {% endif %} 
+    
+    {% if check == 1 %}
+    <div class="chart_div">
+            <canvas id="sentimentChart" class="myChart" ></canvas>
+            <script>
+                var currency = '{{ currency }}';
+                var labels = [
+                    {% for x in X %}
+                        "{{ x }}",
+                    {% endfor %}
+                ]
+
+                var sentiment = [
+                    {% for y in Y %}
+                        "{{ y }}",
+                    {% endfor %}
+                ]
+
+                const data = {
+                    labels: labels,
+                    datasets: [{
+                    label: 'Sentiment Analysis - ' + currency,
+                    backgroundColor: 'rgb(255, 99, 132)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    data: sentiment,
+                    }]
+                };
+
+                const config = {
+                    type: 'line',
+                    data: data,
+                    options: {}
+                };
+
+                const myChart = new Chart(
+                        document.getElementById('sentimentChart'),
+                        config
+                    );
+            </script>
+        </div>
+    {% endif %}
+    </div>
+{% endblock %}

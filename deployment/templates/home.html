@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+{% block content %}
+  <h1 class="heading">Cryptocurrency Predictor</h1>
+  <div class="about">
+    <img src="{{ url_for('static', filename='img/crypto_home.jpg' )}}" class="about_img">
+    <h3 class="subheading">About</h3>
+    <div class="about_description">
+      This is a one stop solution to finding which cryptocurrency to invest in. Right now we offer 3 cryptos to choose from and you can see how their prices change with time on a monthly and daily scale. We also have a tab for sentiment analysis where you can go and fetch twitter tweets real time and see how the market is reacting for that particular cypto. Example you want to know how will Ethereum perform, you can go to Ethereum tab and first see this price prediction for next few days and months then go to sentiment analysis page and select Ethereum and then see how market is currently reacting to it. Based on these results you can now decide to invest. 
+    </div>
+    <h3 class="subheading">Inner Working</h3>
+    <div class="working_description">
+      To train this model we have used a SARIMA model which stands for Seasonal Autoregressive Integrated Moving Average, This is used in forcasting while considering seasonality into pricture which helps in finding the underlying patterns. For sentiment analysis we have used various models like  Naive bayes, Logistic regression, SVC, SGD and made a voted classifier out of it which predicts the output using all these classifier.  </div>
+  </div>
+{% endblock %}

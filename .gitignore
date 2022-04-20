@@ -1,3 +1,6 @@
+#Keys
+apikeys.py
+
 # Jupyter notebook
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
